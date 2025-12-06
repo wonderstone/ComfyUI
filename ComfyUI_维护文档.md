@@ -476,7 +476,64 @@ Get-ChildItem "$env:USERPROFILE\.cache\huggingface\hub" -Directory | Sort-Object
 
 ---
 
-## 8. 待解决问题
+## 8. InsightFace 模型路径问题
+
+### 8.1 问题背景
+
+多个 ComfyUI 插件使用 InsightFace 进行人脸分析，但它们的模型路径处理方式不一致：
+
+| 插件 | 路径获取方式 | 问题 |
+|------|--------------|------|
+| `comfyui_faceanalysis` | `folder_paths.models_dir + "insightface"` | 硬编码，不读取 yaml 配置 |
+| `comfyui_ipadapter_plus` | `folder_paths.models_dir + "insightface"` | 同上 |
+| `comfyui-easy-use` | `folder_paths.models_dir + "insightface"` | 同上 |
+
+**核心问题**：这些插件直接使用 `folder_paths.models_dir`（即 `ComfyUI/models`），而不是通过 `folder_paths.get_folder_paths("insightface")` 获取 yaml 配置的路径。
+
+### 8.2 解决方案：符号链接
+
+由于 `extra_model_paths.yaml` 已配置 `insightface: insightface/` 指向共享目录 `D:\ComfyUI_Official\resources\models\insightface`，但插件不读取该配置，因此采用**符号链接**方式解决：
+
+```powershell
+# 删除本地 insightface 目录（如有重复文件）
+Remove-Item "D:\ComfyUI_windows_portable\ComfyUI\models\insightface" -Recurse -Force
+
+# 创建 Junction 链接指向共享目录
+New-Item -ItemType Junction -Path "D:\ComfyUI_windows_portable\ComfyUI\models\insightface" -Target "D:\ComfyUI_Official\resources\models\insightface"
+```
+
+**效果**：
+- 插件访问 `ComfyUI/models/insightface` 时，实际读取的是共享目录
+- 模型文件不重复存储
+- 符合项目的 yaml 配置约定
+
+### 8.3 InsightFace 模型清单
+
+**共享目录**：`D:\ComfyUI_Official\resources\models\insightface\models\`
+
+| 模型包 | 文件 | 用途 |
+|--------|------|------|
+| `buffalo_l` | 1k3d68.onnx, 2d106det.onnx, det_10g.onnx, genderage.onnx, w600k_r50.onnx | FaceAnalysis 默认模型（约 326 MB） |
+| `antelopev2` | 1k3d68.onnx, 2d106det.onnx, genderage.onnx, glintr100.onnx, scrfd_10g_bnkps.onnx | InstantID/FaceID 使用（约 360 MB） |
+
+### 8.4 FaceAnalysis 距离计算说明
+
+FaceEmbedDistance 节点用于比较两张人脸的相似度，输出的是**距离值**：
+
+| 度量方式 | InsightFace (ArcFace) 阈值 | Dlib 阈值 | 说明 |
+|---------|---------------------------|-----------|------|
+| **cosine** | 0.68 | 0.07 | 余弦距离，范围 0~2，**推荐使用** |
+| **euclidean** | 4.15 | 0.6 | 欧几里得距离 |
+| **L2_norm** | 1.13 | 0.4 | L2 归一化后的欧几里得距离 |
+
+**解读**：
+- ⚠️ **数值越小 = 越相似**（0 = 完全相同的人脸）
+- ✅ 低于阈值 = 判定为同一人
+- ❌ 高于阈值 = 判定为不同人
+
+---
+
+## 9. 待解决问题
 
 - [ ] Git 仓库状态修复（选择方案 1 或 2）
 - [ ] 验证所有 custom nodes 正常工作
@@ -484,7 +541,7 @@ Get-ChildItem "$env:USERPROFILE\.cache\huggingface\hub" -Directory | Sort-Object
 
 ---
 
-## 8. 历史记录
+## 10. 历史记录
 
 | 日期 | 操作 | 结果 |
 |------|------|------|
@@ -503,5 +560,8 @@ Get-ChildItem "$env:USERPROFILE\.cache\huggingface\hub" -Directory | Sort-Object
 | 2025-12-06 | 下载 control-lora-depth-rank256.safetensors | ✅ 完成 |
 | 2025-12-06 | 下载 Intel/zoedepth-nyu-kitti 并配置 HF 缓存 | ✅ 完成 |
 | 2025-12-06 | 添加 InstantID 工作流 Note 节点（basic + depth） | ✅ 完成 |
+| 2025-12-06 | 安装 ComfyUI_FaceAnalysis buffalo_l 模型 | ✅ 完成 |
+| 2025-12-06 | 创建 insightface 符号链接（解决插件路径问题） | ✅ 完成 |
+| 2025-12-06 | 添加 FaceAnalysis 工作流说明 Note 节点 | ✅ 完成 |
 
 
