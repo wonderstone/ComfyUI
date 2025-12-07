@@ -1,0 +1,68 @@
+{
+    "_description": "Fork mapping for custom nodes with local modifications",
+    "_updated": "2025-12-07",
+    "forks": {
+        "comfyui-florence2": {
+            "fork_url": "https://github.com/wonderstone/ComfyUI-Florence2.git",
+            "upstream_url": "https://github.com/kijai/ComfyUI-Florence2.git",
+            "branch": "main"
+        },
+        "ComfyUI-LTXVideo": {
+            "fork_url": "https://github.com/wonderstone/ComfyUI-LTXVideo.git",
+            "upstream_url": "https://github.com/Lightricks/ComfyUI-LTXVideo.git",
+            "branch": "master"
+        },
+        "ComfyUI-NodeAligner": {
+            "fork_url": "https://github.com/wonderstone/ComfyUI-NodeAligner.git",
+            "upstream_url": "https://github.com/Tenney95/ComfyUI-NodeAligner.git",
+            "branch": "main"
+        },
+        "ComfyUI-QwenVL": {
+            "fork_url": "https://github.com/wonderstone/ComfyUI-QwenVL.git",
+            "upstream_url": "https://github.com/1038lab/ComfyUI-QwenVL.git",
+            "branch": "main"
+        },
+        "ComfyUI-RMBG": {
+            "fork_url": "https://github.com/wonderstone/ComfyUI-RMBG.git",
+            "upstream_url": "https://github.com/1038lab/ComfyUI-RMBG.git",
+            "branch": "main"
+        },
+        "ComfyUI-SAM3": {
+            "fork_url": "https://github.com/wonderstone/ComfyUI-SAM3.git",
+            "upstream_url": "https://github.com/PozzettiAndrea/ComfyUI-SAM3.git",
+            "branch": "main"
+        },
+        "ComfyUI-ultimate-openpose-editor": {
+            "fork_url": "https://github.com/wonderstone/ComfyUI-ultimate-openpose-editor.git",
+            "upstream_url": "https://github.com/westNeighbor/ComfyUI-ultimate-openpose-editor.git",
+            "branch": "main"
+        },
+        "ComfyUI-ultimate-openpose-estimator": {
+            "fork_url": "https://github.com/wonderstone/ComfyUI-ultimate-openpose-estimator.git",
+            "upstream_url": "https://github.com/westNeighbor/ComfyUI-ultimate-openpose-estimator.git",
+            "branch": "main",
+            "notes": "ONNX models need separate download"
+        },
+        "ComfyUI-WarpedToolset": {
+            "fork_url": "https://github.com/wonderstone/ComfyUI-WarpedToolset.git",
+            "upstream_url": "https://github.com/WarpedAnimation/ComfyUI-WarpedToolset.git",
+            "branch": "main"
+        },
+        "ComfyUI_Comfyroll_CustomNodes": {
+            "fork_url": "https://github.com/wonderstone/ComfyUI_Comfyroll_CustomNodes.git",
+            "upstream_url": "https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes.git",
+            "branch": "main"
+        },
+        "comfyui_controlnet_aux": {
+            "fork_url": "https://github.com/wonderstone/comfyui_controlnet_aux.git",
+            "upstream_url": "https://github.com/Fannovel16/comfyui_controlnet_aux.git",
+            "branch": "main"
+        }
+    },
+    "comfyui": {
+        "fork_url": "https://github.com/wonderstone/ComfyUI.git",
+        "upstream_url": "https://github.com/comfyanonymous/ComfyUI.git",
+        "branch": "master"
+    }
+}
+
