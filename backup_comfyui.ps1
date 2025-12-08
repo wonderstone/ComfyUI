@@ -289,7 +289,7 @@ if ($nodeModelsIndex.Count -gt 0) {
 # ============================================================
 # 6. 记录模型文件清单（不复制大文件，只记录路径）
 # ============================================================
-Write-Host "`n[6/6] 记录模型文件信息..." -ForegroundColor Cyan
+Write-Host "`n[6/7] 记录模型文件信息..." -ForegroundColor Cyan
 
 $modelPaths = @(
     "D:\ComfyUI_Official\resources\models",
@@ -303,6 +303,7 @@ foreach ($path in $modelPaths) {
     if (Test-Path $path) {
         Get-ChildItem $path -Recurse -File | ForEach-Object {
             $modelInventory += [PSCustomObject]@{
+                name = $_.Name
                 path = $_.FullName
                 size_mb = [math]::Round($_.Length / 1MB, 2)
                 modified = $_.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss")
@@ -316,12 +317,42 @@ $modelInventory | ConvertTo-Json -Depth 3 | Out-File $modelListPath -Encoding UT
 $totalSize = ($modelInventory | Measure-Object -Property size_mb -Sum).Sum / 1024
 Write-Host "  ✓ 已记录 $($modelInventory.Count) 个模型文件 (共 $([math]::Round($totalSize, 2)) GB)" -ForegroundColor Green
 
+# ============================================================
+# 7. 备份模型元数据文件（包含下载来源信息，用于重新下载）
+# ============================================================
+Write-Host "`n[7/7] 备份模型元数据..." -ForegroundColor Cyan
+
+$metadataBackupPath = Join-Path $backupPath "model_metadata"
+New-Item -ItemType Directory -Path $metadataBackupPath -Force | Out-Null
+
+$metadataCount = 0
+foreach ($path in $modelPaths) {
+    if (Test-Path $path) {
+        $pathLeaf = Split-Path $path -Leaf
+        # 查找所有 .metadata.json 文件
+        Get-ChildItem $path -Recurse -File -Filter "*.metadata.json" | ForEach-Object {
+            # 保持相对目录结构
+            $relativePath = $_.FullName.Substring($path.Length).TrimStart('\', '/')
+            $destPath = Join-Path (Join-Path $metadataBackupPath $pathLeaf) $relativePath
+            $destDir = Split-Path $destPath -Parent
+
+            if (-not (Test-Path $destDir)) {
+                New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+            }
+
+            Copy-Item $_.FullName -Destination $destPath -Force
+            $metadataCount++
+        }
+    }
+}
+Write-Host "  ✓ 已备份 $metadataCount 个元数据文件（包含 Civitai/HuggingFace 下载信息）" -ForegroundColor Green
+
 if ($IncludeModels) {
     Write-Host "`n[额外] 备份模型文件 (这可能需要很长时间)..." -ForegroundColor Yellow
     # 使用 robocopy 增量备份
     foreach ($path in $modelPaths) {
         if (Test-Path $path) {
-            $destPath = Join-Path $backupPath "models" (Split-Path $path -Leaf)
+            $destPath = Join-Path (Join-Path $backupPath "models") (Split-Path $path -Leaf)
             robocopy $path $destPath /E /XO /R:1 /W:1 /NP /NFL /NDL
         }
     }
